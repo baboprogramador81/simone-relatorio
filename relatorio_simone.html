@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Campanha · Simone Ferreira</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0d0d10;
+    --surface: #16161c;
+    --surface2: #1e1e27;
+    --border: rgba(255,255,255,0.07);
+    --accent: #c97d4a;
+    --accent2: #e8a87c;
+    --accent-glow: rgba(201,125,74,0.15);
+    --text: #f0ede8;
+    --text-muted: rgba(240,237,232,0.45);
+    --text-sub: rgba(240,237,232,0.65);
+    --green: #5fcfa0;
+    --red: #e07070;
+    --blue: #7ab4e8;
+    --purple: #a89ad8;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 80% 10%, rgba(201,125,74,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(90,90,160,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-inner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(201,125,74,0.3);
+    border-radius: 100px;
+    padding: 4px 12px 4px 8px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 12px;
+  }
+  .brand-tag span.dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.5; transform:scale(0.7); }
+  }
+  .header-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 42px);
+    line-height: 1.1;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .header-title em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+  .header-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-weight: 300;
+  }
+  .header-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    text-align: right;
+  }
+  .header-badge .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .header-badge .value { font-size: 22px; font-weight: 600; color: var(--text); margin-top: 2px; }
+
+  /* ── DATE FILTER ── */
+  .filter-bar {
+    padding: 20px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 4px;
+  }
+  .date-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .date-input:focus { border-color: var(--accent); }
+  .date-sep { color: var(--text-muted); font-size: 13px; }
+  .btn-filter {
+    background: var(--accent);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+  .btn-filter:hover { background: var(--accent2); transform: translateY(-1px); }
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .btn-reset:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-info {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    padding: 24px 0 8px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+  }
+  .kpi-card:hover { border-color: rgba(201,125,74,0.3); transform: translateY(-2px); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .kpi-card:hover::before { opacity: 1; }
+  .kpi-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+  .kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .trend-up { background: rgba(95,207,160,0.12); color: var(--green); }
+  .trend-down { background: rgba(224,112,112,0.12); color: var(--red); }
+
+  /* ── SECTION LAYOUT ── */
+  .section { padding: 28px 0 8px; }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+  .section-sub { font-size: 12px; color: var(--text-muted); }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── CHART CARDS ── */
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+  .chart-card.wide { grid-column: 1 / -1; }
+  .chart-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sub);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap-tall { position: relative; height: 280px; }
+
+  /* ── DEMOGRAPHIC TABLE ── */
+  .demo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 768px) { .demo-grid { grid-template-columns: 1fr; } }
+
+  .demo-bar-list { display: flex; flex-direction: column; gap: 12px; }
+  .demo-bar-item {}
+  .demo-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .demo-bar-label { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+  .demo-bar-value { font-size: 13px; font-weight: 600; }
+  .demo-bar-track {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .demo-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s cubic-bezier(0.4,0,0.2,1);
+  }
+  .demo-bar-fill.female { background: linear-gradient(90deg, #e8a87c, #c97d4a); }
+  .demo-bar-fill.male { background: linear-gradient(90deg, #7ab4e8, #5895d0); }
+  .demo-bar-fill.neutral { background: linear-gradient(90deg, #a89ad8, #8870c0); }
+  .demo-bar-meta { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── GENDER SPLIT ── */
+  .gender-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .gender-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .gender-pct {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    min-width: 72px;
+  }
+  .gender-pct.f { color: var(--accent2); }
+  .gender-pct.m { color: var(--blue); }
+  .gender-info { flex: 1; }
+  .gender-name { font-size: 13px; font-weight: 500; color: var(--text-sub); }
+  .gender-results { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .gender-bar-wrap { margin-top: 4px; }
+  .gender-bar-bg {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .gender-bar-fg {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .gender-bar-fg.f { background: linear-gradient(90deg, #e8a87c, #c97d4a); }
+  .gender-bar-fg.m { background: linear-gradient(90deg, #7ab4e8, #5895d0); }
+
+  /* ── INSIGHTS ── */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color .2s;
+  }
+  .insight-card:hover { border-color: rgba(201,125,74,0.3); }
+  .insight-icon {
+    font-size: 20px;
+    min-width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-radius: 8px;
+  }
+  .insight-body {}
+  .insight-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .insight-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+  .insight-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .badge-ok { background: rgba(95,207,160,0.12); color: var(--green); }
+  .badge-warn { background: rgba(201,125,74,0.12); color: var(--accent2); }
+  .badge-act { background: rgba(224,112,112,0.12); color: var(--red); }
+
+  /* ── DAILY TABLE ── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table thead th:not(:first-child) { text-align: right; }
+  .data-table tbody td {
+    padding: 11px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    color: var(--text-sub);
+  }
+  .data-table tbody td:not(:first-child) { text-align: right; }
+  .data-table tbody tr:hover td { background: var(--surface2); }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .cell-good { color: var(--green) !important; font-weight: 500; }
+  .cell-warn { color: var(--accent2) !important; font-weight: 500; }
+  .cell-bad  { color: var(--red) !important; font-weight: 500; }
+
+  /* ── FOOTER ── */
+  footer {
+    margin-top: 48px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer p { font-size: 12px; color: var(--text-muted); }
+  footer strong { color: var(--accent2); }
+
+  /* ── ANIMATIONS ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in:nth-child(1) { animation-delay: 0.05s; }
+  .fade-in:nth-child(2) { animation-delay: 0.10s; }
+  .fade-in:nth-child(3) { animation-delay: 0.15s; }
+  .fade-in:nth-child(4) { animation-delay: 0.20s; }
+  .fade-in:nth-child(5) { animation-delay: 0.25s; }
+  .fade-in:nth-child(6) { animation-delay: 0.30s; }
+
+  /* no-data notice */
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  /* color squares for legend */
+  .sq { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:4px; vertical-align:middle; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div>
+        <div class="brand-tag"><span class="dot"></span>Meta Ads · Campanha Ativa</div>
+        <h1 class="header-title">Relatório de <em>Desempenho</em></h1>
+        <p class="header-meta">Simone Ferreira · SF | AGENDAMENTOS | WHATS · Fev–Mar 2026</p>
+      </div>
+      <div class="header-badge">
+        <div class="label">Período do relatório</div>
+        <div class="value">Fev 27 – Mar 06</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ FILTER BAR ═══════════════ -->
+<div style="background: var(--surface); border-bottom: 1px solid var(--border);">
+  <div class="container">
+    <div class="filter-bar">
+      <span class="filter-label">🗓 Período</span>
+      <input type="date" class="date-input" id="dateFrom" value="2026-02-27">
+      <span class="date-sep">→</span>
+      <input type="date" class="date-input" id="dateTo" value="2026-03-06">
+      <button class="btn-filter" onclick="applyFilter()">Filtrar</button>
+      <button class="btn-reset" onclick="resetFilter()">Resetar</button>
+      <span class="filter-info" id="filterInfo">Exibindo todos os 8 dias disponíveis</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ KPI CARDS ═══════════════ -->
+<div class="container">
+  <div class="kpi-grid" id="kpiGrid">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<!-- ═══════════════ CHARTS ═══════════════ -->
+<div class="container">
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Evolução Diária</h2>
+      <span class="section-sub">Conversas iniciadas e gasto por dia</span>
+    </div>
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px;">
+      <div class="chart-card">
+        <div class="chart-title">Conversas por Mensagem Iniciadas</div>
+        <div class="chart-wrap-tall"><canvas id="chartConversas"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Gasto Diário (R$)</div>
+        <div class="chart-wrap-tall"><canvas id="chartGasto"></canvas></div>
+      </div>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="chart-card">
+        <div class="chart-title">CPR · Custo por Resultado (R$)</div>
+        <div class="chart-wrap"><canvas id="chartCPR"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ METRICS ═══════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Métricas de Entrega</h2>
+      <span class="section-sub">CPC, CTR e CPM no período selecionado</span>
+    </div>
+    <div class="two-col">
+      <div class="chart-card">
+        <div class="chart-title">CTR — Taxa de Cliques (%)</div>
+        <div class="chart-wrap"><canvas id="chartCTR"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">CPM — Custo por 1.000 Impressões (R$)</div>
+        <div class="chart-wrap"><canvas id="chartCPM"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DEMOGRAPHICS ═══════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Público e Segmentação</h2>
+      <span class="section-sub">Distribuição por gênero e faixa etária · Total da campanha</span>
+    </div>
+    <div class="demo-grid">
+      <!-- Gender split -->
+      <div class="gender-card">
+        <div class="chart-title" style="margin-bottom:6px;">Divisão por Gênero</div>
+        <div class="gender-row">
+          <div class="gender-pct f">91%</div>
+          <div class="gender-info">
+            <div class="gender-name">Mulheres</div>
+            <div class="gender-results">50 resultados · R$ 4,49 p/ resultado</div>
+            <div class="gender-bar-wrap">
+              <div class="gender-bar-bg"><div class="gender-bar-fg f" style="width:91%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="gender-row">
+          <div class="gender-pct m">9%</div>
+          <div class="gender-info">
+            <div class="gender-name">Homens</div>
+            <div class="gender-results">5 resultados · R$ 2,43 p/ resultado</div>
+            <div class="gender-bar-wrap">
+              <div class="gender-bar-bg"><div class="gender-bar-fg m" style="width:9%"></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px; padding:12px; background:var(--surface2); border-radius:var(--radius-sm);">
+          <p style="font-size:11px; color:var(--text-muted); line-height:1.6;">
+            ⚠️ Com Advantage+ ativo, as configurações de gênero são <strong style="color:var(--accent2)">sugestões</strong>, não segmentações fixas. Os homens mostraram CPR <strong style="color:var(--green)">46% mais baixo</strong> que as mulheres.
+          </p>
+        </div>
+      </div>
+
+      <!-- Age breakdown -->
+      <div class="chart-card">
+        <div class="chart-title">Resultados por Faixa Etária</div>
+        <div class="chart-wrap"><canvas id="chartAge"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DAILY TABLE ═══════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Tabela Diária</h2>
+      <span class="section-sub">Métricas completas por dia no período filtrado</span>
+    </div>
+    <div class="chart-card">
+      <div id="tableWrap"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ INSIGHTS ═══════════════ -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">Análise &amp; Recomendações</h2>
+      <span class="section-sub">Com base nos dados do período</span>
+    </div>
+    <div class="insights-grid" id="insightsGrid">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="container">
+  <footer>
+    <p>Relatório gerado por <strong>@soufabiocarvalho</strong> · Estruturador de Aquisição de Clientes</p>
+    <p>Dados: Meta Ads Manager · Fev–Mar 2026 · <span id="footerDate"></span></p>
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const ALL_DAYS = [
+  { data:'2026-02-27', label:'27/fev', gasto:35.38, impressoes:1902, alcance:1429, conversas:13, cpc:0.6508, ctr:3.647, cpm:22.552, cpr:2.72 },
+  { data:'2026-02-28', label:'28/fev', gasto:23.98, impressoes:1320, alcance:972,  conversas:7,  cpc:0.8615, ctr:2.519, cpm:23.092, cpr:3.43 },
+  { data:'2026-03-01', label:'01/mar', gasto:32.02, impressoes:2055, alcance:1605, conversas:6,  cpc:0.4638, ctr:2.375, cpm:15.350, cpr:5.34 },
+  { data:'2026-03-02', label:'02/mar', gasto:34.95, impressoes:2395, alcance:1933, conversas:9,  cpc:0.5445, ctr:2.075, cpm:11.638, cpr:3.88 },
+  { data:'2026-03-03', label:'03/mar', gasto:27.98, impressoes:1955, alcance:1589, conversas:5,  cpc:0.5078, ctr:1.893, cpm:15.735, cpr:5.60 },
+  { data:'2026-03-04', label:'04/mar', gasto:33.77, impressoes:2282, alcance:1914, conversas:8,  cpc:0.4642, ctr:3.867, cpm:15.489, cpr:4.22 },
+  { data:'2026-03-05', label:'05/mar', gasto:24.97, impressoes:1942, alcance:1584, conversas:3,  cpc:0.5329, ctr:2.745, cpm:14.019, cpr:8.32 },
+  { data:'2026-03-06', label:'06/mar', gasto:24.09, impressoes:1784, alcance:1529, conversas:4,  cpc:0.4623, ctr:3.659, cpm:12.300, cpr:6.02 },
+];
+
+const AGE_DATA = [
+  { label:'25–34', mulheres:12, homens:0,  gasto_f:21.84, gasto_m:1.56 },
+  { label:'35–44', mulheres:12, homens:5,  gasto_f:49.31, gasto_m:3.61 },
+  { label:'45–54', mulheres:14, homens:0,  gasto_f:74.89, gasto_m:3.03 },
+  { label:'55–64', mulheres:13, homens:0,  gasto_f:52.34, gasto_m:3.30 },
+  { label:'65+',   mulheres:5,  homens:0,  gasto_f:26.21, gasto_m:0.67 },
+];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let filteredDays = [...ALL_DAYS];
+let charts = {};
+
+// ══════════════════════════════════════════
+// FILTER
+// ══════════════════════════════════════════
+function applyFilter() {
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  filteredDays = ALL_DAYS.filter(d => d.data >= from && d.data <= to);
+  if (filteredDays.length === 0) {
+    document.getElementById('filterInfo').textContent = '⚠ Nenhum dado no período selecionado';
+    filteredDays = [];
+  } else {
+    document.getElementById('filterInfo').textContent =
+      `Exibindo ${filteredDays.length} dia${filteredDays.length > 1 ? 's' : ''} — ${filteredDays[0].label} a ${filteredDays[filteredDays.length-1].label}`;
+  }
+  renderAll();
+}
+
+function resetFilter() {
+  document.getElementById('dateFrom').value = '2026-02-27';
+  document.getElementById('dateTo').value   = '2026-03-06';
+  filteredDays = [...ALL_DAYS];
+  document.getElementById('filterInfo').textContent = 'Exibindo todos os 8 dias disponíveis';
+  renderAll();
+}
+
+// ══════════════════════════════════════════
+// COMPUTED METRICS
+// ══════════════════════════════════════════
+function computeKPIs(days) {
+  if (!days.length) return null;
+  const totalConversas = days.reduce((s,d)=>s+d.conversas,0);
+  const totalGasto     = days.reduce((s,d)=>s+d.gasto,0);
+  const totalImpressoes= days.reduce((s,d)=>s+d.impressoes,0);
+  const totalAlcance   = days.reduce((s,d)=>s+d.alcance,0);
+  const avgCPR  = totalConversas > 0 ? totalGasto/totalConversas : 0;
+  const avgCTR  = days.reduce((s,d)=>s+d.ctr,0)/days.length;
+  const avgCPM  = days.reduce((s,d)=>s+d.cpm,0)/days.length;
+  const avgCPC  = days.reduce((s,d)=>s+d.cpc,0)/days.length;
+  return { totalConversas, totalGasto, totalImpressoes, totalAlcance, avgCPR, avgCTR, avgCPM, avgCPC };
+}
+
+// ══════════════════════════════════════════
+// RENDER KPIs
+// ══════════════════════════════════════════
+function renderKPIs() {
+  const kpis = computeKPIs(filteredDays);
+  const grid = document.getElementById('kpiGrid');
+  if (!kpis) { grid.innerHTML = '<p class="no-data">Nenhum dado no período.</p>'; return; }
+
+  const cards = [
+    { icon:'💬', iconBg:'rgba(201,125,74,0.15)', label:'Conversas Iniciadas', value: kpis.totalConversas, unit:'', trend:null, sub:'Total do período filtrado' },
+    { icon:'💸', iconBg:'rgba(201,125,74,0.12)', label:'Valor Gasto', value: 'R$ ' + kpis.totalGasto.toFixed(2).replace('.',','), unit:'', trend:null, sub:'Investimento no período' },
+    { icon:'🎯', iconBg:'rgba(95,207,160,0.12)', label:'Custo / Resultado', value: 'R$ ' + kpis.avgCPR.toFixed(2).replace('.',','), unit:'', trend: kpis.avgCPR < 4 ? 'up' : 'down', trendLabel: kpis.avgCPR < 4 ? 'Abaixo de R$4' : 'Acima de R$4', sub:'CPR médio do período' },
+    { icon:'👥', iconBg:'rgba(122,180,232,0.12)', label:'Alcance', value: kpis.totalAlcance.toLocaleString('pt-BR'), unit:'', trend:null, sub:'Pessoas alcançadas' },
+    { icon:'📊', iconBg:'rgba(168,154,216,0.12)', label:'Impressões', value: kpis.totalImpressoes.toLocaleString('pt-BR'), unit:'', trend:null, sub:'Total de exibições' },
+    { icon:'🖱️', iconBg:'rgba(95,207,160,0.10)', label:'CTR Médio', value: kpis.avgCTR.toFixed(2).replace('.',',') + '%', unit:'', trend: kpis.avgCTR > 2 ? 'up' : 'down', trendLabel: kpis.avgCTR > 2 ? 'Acima de 2%' : 'Abaixo de 2%', sub:'Taxa de clique no link' },
+  ];
+
+  grid.innerHTML = cards.map((c,i) => `
+    <div class="kpi-card fade-in">
+      <div class="kpi-icon" style="background:${c.iconBg}">${c.icon}</div>
+      <div class="kpi-label">${c.label}</div>
+      <div class="kpi-value">${c.value}</div>
+      ${c.trend ? `<div class="kpi-trend trend-${c.trend === 'up' ? 'up' : 'down'}">${c.trend==='up'?'↑':'↓'} ${c.trendLabel}</div>` : ''}
+      <div class="kpi-sub">${c.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// CHART DEFAULTS
+// ══════════════════════════════════════════
+Chart.defaults.color = 'rgba(240,237,232,0.45)';
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.display = false;
+
+function destroyChart(id) {
+  if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function gridLines() {
+  return {
+    color: 'rgba(255,255,255,0.05)',
+    drawTicks: false,
+  };
+}
+
+function tickStyle() {
+  return { padding: 8, color: 'rgba(240,237,232,0.45)' };
+}
+
+// ══════════════════════════════════════════
+// RENDER CHARTS
+// ══════════════════════════════════════════
+function renderCharts() {
+  const days = filteredDays;
+  const labels = days.map(d=>d.label);
+
+  // 1) Conversas
+  destroyChart('conversas');
+  charts.conversas = new Chart(document.getElementById('chartConversas'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: days.map(d=>d.conversas),
+        backgroundColor: days.map(d => d.conversas === Math.max(...days.map(x=>x.conversas)) ? '#c97d4a' : 'rgba(201,125,74,0.35)'),
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: { callbacks: { label: c => ` ${c.raw} conversas` } } },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false } },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), stepSize:3 }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+
+  // 2) Gasto
+  destroyChart('gasto');
+  charts.gasto = new Chart(document.getElementById('chartGasto'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: days.map(d=>d.gasto),
+        backgroundColor: 'rgba(122,180,232,0.35)',
+        borderColor: '#7ab4e8',
+        borderWidth: 1,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: { callbacks: { label: c => ` R$ ${c.raw.toFixed(2)}` } } },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false } },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), callback: v => 'R$'+v }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+
+  // 3) CPR
+  destroyChart('cpr');
+  charts.cpr = new Chart(document.getElementById('chartCPR'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: days.map(d=>d.cpr),
+        borderColor: '#e8a87c',
+        backgroundColor: 'rgba(232,168,124,0.1)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: days.map(d => d.cpr > 6 ? '#e07070' : d.cpr < 4 ? '#5fcfa0' : '#e8a87c'),
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: { callbacks: { label: c => ` R$ ${c.raw.toFixed(2)}` } } },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false } },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), callback: v => 'R$'+v }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+
+  // 4) CTR
+  destroyChart('ctr');
+  charts.ctr = new Chart(document.getElementById('chartCTR'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: days.map(d=>d.ctr),
+        borderColor: '#5fcfa0',
+        backgroundColor: 'rgba(95,207,160,0.08)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#5fcfa0',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: { callbacks: { label: c => ` ${c.raw.toFixed(2)}%` } } },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false } },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), callback: v => v+'%' }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+
+  // 5) CPM
+  destroyChart('cpm');
+  charts.cpm = new Chart(document.getElementById('chartCPM'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: days.map(d=>d.cpm),
+        borderColor: '#a89ad8',
+        backgroundColor: 'rgba(168,154,216,0.08)',
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#a89ad8',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { tooltip: { callbacks: { label: c => ` R$ ${c.raw.toFixed(2)}` } } },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false } },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), callback: v => 'R$'+v }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+
+  // 6) Age breakdown (static, full campaign)
+  destroyChart('age');
+  charts.age = new Chart(document.getElementById('chartAge'), {
+    type: 'bar',
+    data: {
+      labels: AGE_DATA.map(a=>a.label),
+      datasets: [
+        {
+          label: 'Mulheres',
+          data: AGE_DATA.map(a=>a.mulheres),
+          backgroundColor: 'rgba(201,125,74,0.65)',
+          borderRadius: 4,
+          borderSkipped: false,
+        },
+        {
+          label: 'Homens',
+          data: AGE_DATA.map(a=>a.homens),
+          backgroundColor: 'rgba(122,180,232,0.65)',
+          borderRadius: 4,
+          borderSkipped: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          labels: { color: 'rgba(240,237,232,0.55)', font:{size:11}, boxWidth:10, boxHeight:10, borderRadius:2 }
+        },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.raw} result.` } }
+      },
+      scales: {
+        x: { grid: gridLines(), ticks: tickStyle(), border: { display:false }, stacked:false },
+        y: { grid: gridLines(), ticks: { ...tickStyle(), stepSize:4 }, border: { display:false }, beginAtZero:true }
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// RENDER TABLE
+// ══════════════════════════════════════════
+function renderTable() {
+  const days = filteredDays;
+  const wrap = document.getElementById('tableWrap');
+  if (!days.length) { wrap.innerHTML = '<p class="no-data">Nenhum dado no período selecionado.</p>'; return; }
+
+  const maxConv = Math.max(...days.map(d=>d.conversas));
+  const minCPR  = Math.min(...days.map(d=>d.cpr));
+
+  wrap.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Conversas</th>
+          <th>CPR (R$)</th>
+          <th>Gasto (R$)</th>
+          <th>Impressões</th>
+          <th>Alcance</th>
+          <th>CTR (%)</th>
+          <th>CPM (R$)</th>
+          <th>CPC (R$)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${days.map(d => {
+          const convClass = d.conversas === maxConv ? 'cell-good' : d.conversas <= 4 ? 'cell-warn' : '';
+          const cprClass  = d.cpr === minCPR ? 'cell-good' : d.cpr > 6 ? 'cell-bad' : d.cpr > 4.5 ? 'cell-warn' : '';
+          return `<tr>
+            <td style="font-weight:500;color:var(--text)">${d.label}</td>
+            <td class="${convClass}">${d.conversas}</td>
+            <td class="${cprClass}">${d.cpr.toFixed(2)}</td>
+            <td>${d.gasto.toFixed(2)}</td>
+            <td>${d.impressoes.toLocaleString('pt-BR')}</td>
+            <td>${d.alcance.toLocaleString('pt-BR')}</td>
+            <td>${d.ctr.toFixed(2)}</td>
+            <td>${d.cpm.toFixed(2)}</td>
+            <td>${d.cpc.toFixed(3)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ══════════════════════════════════════════
+// RENDER INSIGHTS
+// ══════════════════════════════════════════
+function renderInsights() {
+  const kpis = computeKPIs(filteredDays);
+  if (!kpis) { document.getElementById('insightsGrid').innerHTML = ''; return; }
+
+  const days = filteredDays;
+  const bestDay = days.reduce((a,b) => b.cpr < a.cpr ? b : a, days[0]);
+  const worstDay= days.reduce((a,b) => b.cpr > a.cpr ? b : a, days[0]);
+
+  const insights = [
+    {
+      icon: '🏆',
+      badge: 'badge-ok',
+      badgeText: 'Melhor dia',
+      title: `${bestDay.label} — CPR de R$ ${bestDay.cpr.toFixed(2)}`,
+      text: `Dia mais eficiente do período: ${bestDay.conversas} conversas por R$ ${bestDay.gasto.toFixed(2)} gastos. Use como referência de criativo e horário.`
+    },
+    {
+      icon: '📉',
+      badge: kpis.avgCPR < 5 ? 'badge-ok' : 'badge-warn',
+      badgeText: kpis.avgCPR < 5 ? 'Eficiente' : 'Atenção',
+      title: `CPR médio: R$ ${kpis.avgCPR.toFixed(2)}`,
+      text: `${kpis.avgCPR < 4.5 ? 'Abaixo de R$5,00 — resultado saudável para agendamentos via WhatsApp.' : 'Próximo do teto ideal. Considere testar novo criativo para reduzir CPR.'}`
+    },
+    {
+      icon: '👩',
+      badge: 'badge-ok',
+      badgeText: 'Insight público',
+      title: 'Mulheres dominam: 91% dos resultados',
+      text: 'Faixa etária 45–54 com maior volume (14 result.). Homens converteram com CPR 46% menor — vale testar campanha específica para público masculino.'
+    },
+    {
+      icon: '📅',
+      badge: 'badge-warn',
+      badgeText: 'Padrão detectado',
+      title: `${worstDay.label} com CPR de R$ ${worstDay.cpr.toFixed(2)}`,
+      text: `Dia menos eficiente. Verifique se houve mudança no criativo, orçamento ou público nesse período.`
+    },
+    {
+      icon: '📱',
+      badge: 'badge-ok',
+      badgeText: 'Objetivo',
+      title: 'Campanha de Agendamento por WhatsApp',
+      text: 'Campanha focada em conversas iniciadas via mensagem. O sucesso deve ser validado também pela taxa de conversão de conversa → agendamento confirmado.'
+    },
+    {
+      icon: '⚙️',
+      badge: kpis.totalConversas >= 50 ? 'badge-ok' : 'badge-warn',
+      badgeText: kpis.totalConversas >= 50 ? 'Volume adequado' : 'Volume baixo',
+      title: `${kpis.totalConversas} conversas no período filtrado`,
+      text: kpis.totalConversas >= 50
+        ? 'Volume suficiente para análise estatística. Continue otimizando com base nos melhores dias.'
+        : 'Volume ainda abaixo do ideal para decisões estatísticas robustas. Aguarde mais dados antes de grandes mudanças.'
+    },
+  ];
+
+  document.getElementById('insightsGrid').innerHTML = insights.map(i => `
+    <div class="insight-card fade-in">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-body">
+        <div class="insight-badge ${i.badge}">${i.badgeText}</div>
+        <div class="insight-title">${i.title}</div>
+        <div class="insight-text">${i.text}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+// MAIN
+// ══════════════════════════════════════════
+function renderAll() {
+  renderKPIs();
+  renderCharts();
+  renderTable();
+  renderInsights();
+}
+
+document.getElementById('footerDate').textContent =
+  new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'});
+
+renderAll();
+</script>
+</body>
+</html>
